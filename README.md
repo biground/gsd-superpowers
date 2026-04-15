@@ -96,7 +96,7 @@ Built-in quality gates catch real problems: schema drift detection flags ORM cha
 - **TDD pipeline mode** — Opt-in test-driven development workflow with `--tdd` flag
 - **Context-window-aware prompt thinning** — Automatic prompt size reduction for sub-200K models
 - **Project skills awareness** — 9 GSD agents now discover and use project-scoped skills
-- **Superpowers integration** — Specialist skills library (`skills/`) + 7 new `sp-*` commands: brainstorming, TDD, subagent-driven dev, parallel dispatch, git worktrees, branch finishing, and code-review reception
+- **Superpowers integration** — 15 packaged skills in `skills/`, 3 integrated agents (`gem-orchestrator`, `gem-narrative-writer`, `gsd-critic`), 7 user-facing `sp-*` workflows, and targeted upgrades to planning, execution, debugging, review, UI, docs, and security agents
 - **30+ bug fixes** — Worktree safety, state management, installer paths, and health check optimizations
 
 ---
@@ -118,7 +118,7 @@ Verify with:
 - Cline: GSD installs via `.clinerules` — verify by checking `.clinerules` exists
 
 > [!NOTE]
-> Claude Code 2.1.88+, Qwen Code, and Codex install as skills (`skills/gsd-*/SKILL.md`). Older Claude Code versions use `commands/gsd/`. Cline uses `.clinerules` for configuration. The installer handles all formats automatically.
+> Claude Code 2.1.88+, Qwen Code, and Codex install as skills (`skills/gsd-*/SKILL.md`). Copilot installs into `~/.copilot/` (global) or `./.github/` (local), generates `copilot-instructions.md`, and normalizes command names from `gsd:*` to `gsd-*`. Older Claude Code versions use `commands/gsd/`. Cline uses `.clinerules` for configuration. The installer handles all formats automatically.
 
 > [!TIP]
 > For source-based installs or environments where npm is unavailable, see **[docs/manual-update.md](docs/manual-update.md)**.
@@ -154,7 +154,7 @@ npx get-shit-done-cc --codex --global    # Install to ~/.codex/
 npx get-shit-done-cc --codex --local     # Install to ./.codex/
 
 # Copilot
-npx get-shit-done-cc --copilot --global  # Install to ~/.github/
+npx get-shit-done-cc --copilot --global  # Install to ~/.copilot/
 npx get-shit-done-cc --copilot --local   # Install to ./.github/
 
 # Cursor CLI
@@ -645,6 +645,10 @@ You're never locked in. The system adapts.
 
 Specialist skills and workflows integrated from the [Superpowers for Copilot](https://github.com/biground/superpowers4copilot) project.
 
+This integration ships at three layers: 15 packaged skills in `skills/`, 3 dedicated agents (`gem-orchestrator`, `gem-narrative-writer`, `gsd-critic`), and targeted upgrades to existing planning, execution, debugging, review, UI, documentation, and security agents. The table below lists the 7 user-facing Superpowers workflows.
+
+> Source command files use `/gsd:sp-*`. Copilot installs normalize these to `/gsd-sp-*` and wire the runtime through `copilot-instructions.md`.
+
 | Command | What it does |
 |---------|------------|
 | `/gsd:sp-brainstorm` | Collaborative brainstorming — idea → design spec before writing any code |
@@ -656,6 +660,15 @@ Specialist skills and workflows integrated from the [Superpowers for Copilot](ht
 | `/gsd:sp-code-review-recv` | Receive code review feedback — process review comments and fix |
 
 > Skills are loaded from `skills/` (e.g. `skills/brainstorming/SKILL.md`). Each `sp-*` command reads the corresponding skill file and follows its workflow.
+>
+> Key behaviors:
+> - `sp-brainstorm` turns ideas into a spec before implementation and hands off cleanly into planning.
+> - `sp-worktree` creates an isolated worktree and validates the environment before coding.
+> - `sp-branch-finish` runs a test gate first, then guides merge/push/cleanup decisions.
+> - `sp-code-review-recv` is for handling human review feedback, not automated `REVIEW.md` repair.
+>
+> See [docs/superpowers-integration.md](docs/superpowers-integration.md) for the full integration map.
+
 ### Code Quality
 
 | Command | What it does |
@@ -834,6 +847,7 @@ This prevents Claude from reading these files entirely, regardless of what comma
 **Commands not found after install?**
 - Restart your runtime to reload commands/skills
 - Verify files exist in `~/.claude/skills/gsd-*/SKILL.md` (Claude Code 2.1.88+) or `~/.claude/commands/gsd/` (legacy)
+- For Copilot, verify GSD files exist under `~/.copilot/` (global) or `./.github/` (local), and `copilot-instructions.md` was generated
 - For Codex, verify skills exist in `~/.codex/skills/gsd-*/SKILL.md` (global) or `./.codex/skills/gsd-*/SKILL.md` (local)
 
 **Commands not working as expected?**

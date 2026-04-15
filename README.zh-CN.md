@@ -4,7 +4,7 @@
 
 [English](README.md) · [Português](README.pt-BR.md) · **简体中文** · [日本語](README.ja-JP.md) · [한국어](README.ko-KR.md)
 
-**一个轻量但强大的元提示、上下文工程与规格驱动开发系统，适用于 Claude Code、OpenCode、Gemini CLI、Kilo、Codex、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、CodeBuddy 和 Cline。**
+**一个轻量但强大的元提示、上下文工程与规格驱动开发系统，适用于 Claude Code、OpenCode、Gemini CLI、Kilo、Codex、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、Qwen Code、CodeBuddy 和 Cline。**
 
 **它解决的是 context rot：随着 Claude 的上下文窗口被填满，输出质量逐步劣化的问题。**
 
@@ -80,7 +80,7 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 - **TDD 流水线模式** — `--tdd` 标志可选开启测试驱动开发工作流
 - **上下文感知的提示剔减** — 针对 200K 以下模型自动缩减提示词大小
 - **项目技能感知** — 9 个 GSD 代理现在可自动发现并加载项目级技能
-- **Superpowers 集成** — 专业技能库（`skills/`）+ 7 个新的 `sp-*` 命令：头脑风暴、TDD、子代理驱动开发、并行调度、Git worktree、分支收尾、接收代码审查
+- **Superpowers 集成** — `skills/` 中打包了 15 个专业技能，新增 3 个集成 agent（`gem-orchestrator`、`gem-narrative-writer`、`gsd-critic`），并提供 7 个面向用户的 `sp-*` 工作流，同时增强了规划、执行、调试、审查、UI、文档与安全相关 agent
 - **30+ bug 修复** — worktree 安全性、状态管理、安装路径、健康检查优化
 
 ---
@@ -92,17 +92,17 @@ npx get-shit-done-cc@latest
 ```
 
 安装器会提示你选择：
-1. **运行时**：Claude Code、OpenCode、Gemini、Kilo、Codex、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、CodeBuddy、Cline，或全部
+1. **运行时**：Claude Code、OpenCode、Gemini、Kilo、Codex、Copilot、Cursor、Windsurf、Antigravity、Augment、Trae、Qwen Code、CodeBuddy、Cline，或全部
 2. **安装位置**：全局（所有项目）或本地（仅当前项目）
 
 安装后可这样验证：
-- Claude Code / Gemini / Copilot / Antigravity：`/gsd-help`
+- Claude Code / Gemini / Copilot / Antigravity / Qwen Code：`/gsd-help`
 - OpenCode / Kilo / Augment / Trae / CodeBuddy：`/gsd-help`
 - Codex：`$gsd-help`
 - Cline：GSD 通过 `.clinerules` 安装 — 检查 `.clinerules` 是否存在
 
 > [!NOTE]
-> Claude Code 2.1.88+ 和 Codex 以 skill 形式安装（`skills/gsd-*/SKILL.md`）。Cline 使用 `.clinerules`。安装器会自动处理所有格式。
+> Claude Code 2.1.88+、Qwen Code 和 Codex 以 skill 形式安装（`skills/gsd-*/SKILL.md`）。Copilot 全局安装到 `~/.copilot/`，本地安装到 `./.github/`，并会生成 `copilot-instructions.md`，同时把命令名从 `gsd:*` 规范化为 `gsd-*`。旧版 Claude Code 仍使用 `commands/gsd/`。Cline 使用 `.clinerules`。安装器会自动处理所有格式。
 
 > [!TIP]
 > 基于源码安装或无法使用 npm 的环境，请参阅 **[docs/manual-update.md](docs/manual-update.md)**。
@@ -138,12 +138,16 @@ npx get-shit-done-cc --codex --global    # 安装到 ~/.codex/
 npx get-shit-done-cc --codex --local     # 安装到 ./.codex/
 
 # Copilot
-npx get-shit-done-cc --copilot --global  # 安装到 ~/.github/
+npx get-shit-done-cc --copilot --global  # 安装到 ~/.copilot/
 npx get-shit-done-cc --copilot --local   # 安装到 ./.github/
 
 # Cursor CLI
 npx get-shit-done-cc --cursor --global   # 安装到 ~/.cursor/
 npx get-shit-done-cc --cursor --local    # 安装到 ./.cursor/
+
+# Windsurf
+npx get-shit-done-cc --windsurf --global # 安装到 ~/.codeium/windsurf/
+npx get-shit-done-cc --windsurf --local  # 安装到 ./.windsurf/
 
 # Antigravity
 npx get-shit-done-cc --antigravity --global # 安装到 ~/.gemini/antigravity/
@@ -156,6 +160,10 @@ npx get-shit-done-cc --augment --local      # 安装到 ./.augment/
 # Trae
 npx get-shit-done-cc --trae --global     # 安装到 ~/.trae/
 npx get-shit-done-cc --trae --local      # 安装到 ./.trae/
+
+# Qwen Code
+npx get-shit-done-cc --qwen --global     # 安装到 ~/.qwen/
+npx get-shit-done-cc --qwen --local      # 安装到 ./.qwen/
 
 # CodeBuddy
 npx get-shit-done-cc --codebuddy --global # 安装到 ~/.codebuddy/
@@ -170,20 +178,24 @@ npx get-shit-done-cc --all --global      # 安装到所有目录
 ```
 
 使用 `--global`（`-g`）或 `--local`（`-l`）可以跳过安装位置提示。
-使用 `--claude`、`--opencode`、`--gemini`、`--kilo`、`--codex`、`--copilot`、`--cursor`、`--windsurf`、`--antigravity`、`--augment`、`--trae`、`--codebuddy`、`--cline` 或 `--all` 可以跳过运行时提示。
+使用 `--claude`、`--opencode`、`--gemini`、`--kilo`、`--codex`、`--copilot`、`--cursor`、`--windsurf`、`--antigravity`、`--augment`、`--trae`、`--qwen`、`--codebuddy`、`--cline` 或 `--all` 可以跳过运行时提示。
+使用 `--sdk` 还可以额外安装 GSD SDK CLI（`gsd-sdk`），用于无头自主执行。
 
 </details>
 
 <details>
 <summary><strong>开发安装</strong></summary>
 
-克隆仓库并在本地运行安装器：
+克隆仓库、构建 hooks，然后在本地运行安装器：
 
 ```bash
 git clone https://github.com/gsd-build/get-shit-done.git
 cd get-shit-done
+npm run build:hooks
 node bin/install.js --claude --local
 ```
+
+`build:hooks` 这一步是必需的。它会把 hook 源码编译到 `hooks/dist/`，安装器就是从这里复制 hook；如果跳过这一步，安装虽然能继续，但运行时会出现 hook 缺失错误。（npm 发布包会在 `prepublishOnly` 里自动处理这一步。）
 
 这样会安装到 `./.claude/`，方便你在贡献代码前测试自己的改动。
 
@@ -427,9 +439,11 @@ claude --dangerously-skip-permissions
 
 **`--research` 参数：** 在规划前拉起研究代理。调查实现方式、库选型和潜在坑点。适合你不确定怎么下手的场景。
 
-**`--full` 参数：** 启用计划检查（最多 2 轮迭代）和执行后验证。
+**`--full` 参数：** 启用完整流程：discussion + research + plan-checking + verification。
 
-参数可组合使用：`--discuss --research --full` 可同时获得讨论 + 研究 + 计划检查 + 验证。
+**`--validate` 参数：** 只开启 plan-checking + 执行后 verification。
+
+参数可组合使用：`--discuss --research --validate` 可同时获得讨论 + 研究 + 计划检查 + 验证。
 
 ```
 /gsd-quick
@@ -576,6 +590,7 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-help` | 显示全部命令和使用指南 |
 | `/gsd-update` | 更新 GSD，并预览变更日志 |
 | `/gsd-join-discord` | 加入 GSD Discord 社区 |
+| `/gsd-manager` | 交互式命令中心，用于管理多个阶段和工作流 |
 
 ### Brownfield
 
@@ -597,6 +612,10 @@ lmn012o feat(08-02): create registration endpoint
 
 集成自 [Superpowers for Copilot](https://github.com/biground/superpowers4copilot) 项目的专业技能和工作流。
 
+这套集成分三层提供能力：`skills/` 中打包了 15 个专业技能，新增 3 个专用 agent（`gem-orchestrator`、`gem-narrative-writer`、`gsd-critic`），并增强了现有的规划、执行、调试、审查、UI、文档和安全 agent。下表列的是 7 个直接面向用户的 Superpowers 工作流入口。
+
+> 源文件里的命令名写作 `/gsd:sp-*`。安装到 Copilot 后，安装器会把它们规范化成 `/gsd-sp-*`，并通过 `copilot-instructions.md` 接好运行时行为。
+
 | 命令 | 作用 |
 |------|------|
 | `/gsd:sp-brainstorm` | 协作式头脑风暴——在编写任何代码前，将想法转化为设计方案 |
@@ -608,20 +627,33 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd:sp-code-review-recv` | 接收代码审查反馈——处理审查意见并修复 |
 
 > 技能文件位于 `skills/` 目录（如 `skills/brainstorming/SKILL.md`）。每个 `sp-*` 命令会读取对应的 SKILL.md 并遵循其工作流。
+>
+> 关键行为：
+> - `sp-brainstorm` 会先把想法收敛成 spec，再衔接到后续规划。
+> - `sp-worktree` 不只是建目录，还会在编码前校验隔离工作区和环境状态。
+> - `sp-branch-finish` 会先过测试门禁，再给出合并、推送、清理等收尾选项。
+> - `sp-code-review-recv` 面向人工代码审查反馈，不是自动修 `REVIEW.md` 的替代品。
+>
+> 更完整的集成地图见 [docs/superpowers-integration.md](docs/superpowers-integration.md)。
 
 ### 代码质量
 
 | 命令 | 作用 |
 |------|------|
 | `/gsd-review` | 对当前阶段或分支进行跨 AI 同行评审 |
+| `/gsd-secure-phase [N]` | 以威胁模型为锚点执行安全验证 |
 | `/gsd-pr-branch` | 创建过滤 `.planning/` 提交的干净 PR 分支 |
 | `/gsd-audit-uat` | 审计验证债务——找出缺少 UAT 的阶段 |
+| `/gsd-docs-update` | 由 doc-writer 和 doc-verifier 协同生成并验证文档 |
 
-### 积压
+### 积压与上下文线程
 
 | 命令 | 作用 |
 |------|------|
 | `/gsd-plant-seed <idea>` | 将想法存入积压停车场，留待未来里程碑 |
+| `/gsd-add-backlog <desc>` | 将想法加入 backlog parking lot（999.x 编号，不占用当前主序列） |
+| `/gsd-review-backlog` | 审阅 backlog，并提升值得进入当前里程碑的条目 |
+| `/gsd-thread [name]` | 持久化上下文线程，适合跨会话持续推进的工作 |
 
 ### 会话
 
@@ -642,7 +674,7 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-debug [desc]` | 使用持久状态进行系统化调试 |
 | `/gsd-do <text>` | 将自由文本自动路由到正确的 GSD 命令 |
 | `/gsd-note <text>` | 零摩擦想法捕捉——追加、列出或提升为待办 |
-| `/gsd-quick [--full] [--discuss] [--research]` | 以 GSD 保障执行临时任务（`--full` 增加计划检查和验证，`--discuss` 先补上下文，`--research` 在规划前先调研） |
+| `/gsd-quick [--full] [--validate] [--discuss] [--research]` | 以 GSD 保障执行临时任务（`--full` 启用完整流程，`--validate` 增加计划检查和验证，`--discuss` 先补上下文，`--research` 在规划前先调研） |
 | `/gsd-health [--repair]` | 校验 `.planning/` 目录完整性，带 `--repair` 时自动修复 |
 | `/gsd-stats` | 显示项目统计——阶段、计划、需求、git 指标 |
 | `/gsd-profile-user [--questionnaire] [--refresh]` | 从会话分析生成开发者行为档案，用于个性化响应 |
@@ -661,6 +693,7 @@ GSD 将项目设置保存在 `.planning/config.json`。你可以在 `/gsd-new-pr
 |---------|---------|---------|------|
 | `mode` | `yolo`, `interactive` | `interactive` | 自动批准，还是每一步确认 |
 | `granularity` | `coarse`, `standard`, `fine` | `standard` | phase 粒度，也就是范围切分得多细 |
+| `project_code` | string | `""` | 为 phase 目录加上项目代码前缀 |
 
 ### 模型 Profile
 
@@ -694,7 +727,9 @@ GSD 将项目设置保存在 `.planning/config.json`。你可以在 `/gsd-new-pr
 | `workflow.auto_advance` | `false` | 自动串联 discuss → plan → execute，不中途停下 |
 | `workflow.research_before_questions` | `false` | 在讨论提问前先运行研究，而非之后 |
 | `workflow.skip_discuss` | `false` | 在自主模式下完全跳过讨论阶段 |
-| `workflow.discuss_mode` | `null` | 控制讨论阶段行为（`assumptions` 使用推断默认值） |
+| `workflow.discuss_mode` | `'discuss'` | 讨论模式：`discuss`（访谈式）或 `assumptions`（代码库优先） |
+| `workflow.text_mode` | `false` | 面向远程会话的纯文本模式（不使用 TUI 菜单） |
+| `workflow.use_worktrees` | `true` | 控制执行阶段是否使用 worktree 隔离 |
 
 可以用 `/gsd-settings` 开关这些项，也可以在单次命令里覆盖：
 - `/gsd-plan-phase --skip-research`
@@ -707,6 +742,16 @@ GSD 将项目设置保存在 `.planning/config.json`。你可以在 `/gsd-new-pr
 | `parallelization.enabled` | `true` | 是否并行执行独立计划 |
 | `planning.commit_docs` | `true` | 是否将 `.planning/` 纳入 git 跟踪 |
 | `hooks.context_warnings` | `true` | 显示上下文窗口使用量警告 |
+
+### Agent Skills
+
+在执行期间，把项目级技能注入到对应 subagent。
+
+| Setting | Type | 作用 |
+|---------|------|------|
+| `agent_skills.<agent_type>` | `string[]` | 指向要在该 agent 启动时加载的技能目录路径 |
+
+这些技能会以 `<agent_skills>` 块注入到 agent prompt 中，让 subagent 拿到项目特有知识。
 
 ### Git 分支策略
 
@@ -762,7 +807,8 @@ GSD 的代码库映射和分析命令会读取文件来理解你的项目。**�
 
 **安装后找不到命令？**
 - 重启你的运行时，让命令或 skills 重新加载
-- 检查文件是否存在于 `~/.claude/commands/gsd/`（全局）或 `./.claude/commands/gsd/`（本地）
+- 对 Claude Code 2.1.88+，检查 `~/.claude/skills/gsd-*/SKILL.md`；旧版 Claude Code 再检查 `~/.claude/commands/gsd/`
+- 对 Copilot，检查 GSD 文件是否出现在 `~/.copilot/`（全局）或 `./.github/`（本地），并确认 `copilot-instructions.md` 已生成
 - 对 Codex，检查 skills 是否存在于 `~/.codex/skills/gsd-*/SKILL.md`（全局）或 `./.codex/skills/gsd-*/SKILL.md`（本地）
 
 **命令行为不符合预期？**
