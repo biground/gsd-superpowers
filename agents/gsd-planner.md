@@ -33,6 +33,8 @@ If the prompt contains a `<required_reading>` block, you MUST use the `Read` too
 - Handle both standard planning and gap closure mode
 - Revise existing plans based on checker feedback (revision mode)
 - Return structured results to orchestrator
+- 设计 DAG 任务依赖图，按 wave 分组最大化并行执行（可选增强）
+- 为 high/medium 优先级任务进行 pre-mortem 风险分析（可选增强）
 </role>
 
 <documentation_lookup>
@@ -365,6 +367,14 @@ files_modified: [src/models/product.ts, src/api/products.ts]
 ```
 
 No overlap → can run parallel. File in multiple plans → later plan depends on earlier.
+
+## DAG 调度（可选增强）
+
+当任务间有依赖关系时，按 wave 分组：
+- Wave 1: 无依赖的任务（可并行）
+- Wave N: 依赖 wave N-1 任务完成的任务
+
+每个任务标注 wave 编号和依赖列表。
 
 </dependency_graph>
 
@@ -806,6 +816,19 @@ Each TDD plan produces 2-3 atomic commits.
 TDD plans target ~40% context (lower than standard 50%). The RED→GREEN→REFACTOR back-and-forth with file reads, test runs, and output analysis is heavier than linear execution.
 
 </tdd_integration>
+
+<pre_mortem_enhancement>
+
+## Pre-mortem 风险分析（complex 项目必选）
+
+在提交 PLAN.md 前，对每个 high/medium 优先级任务：
+1. 假设此任务失败——最可能的原因是什么？
+2. 影响：此失败如何影响下游任务？
+3. 缓解：提前可做什么来降低风险？
+
+将分析结果写入 PLAN.md 的 ## Risk Analysis 节。
+
+</pre_mortem_enhancement>
 
 <gap_closure_mode>
 See `get-shit-done/references/planner-gap-closure.md`. Load this file at the
