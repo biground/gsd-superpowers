@@ -96,6 +96,7 @@ Built-in quality gates catch real problems: schema drift detection flags ORM cha
 - **TDD pipeline mode** — Opt-in test-driven development workflow with `--tdd` flag
 - **Context-window-aware prompt thinning** — Automatic prompt size reduction for sub-200K models
 - **Project skills awareness** — 9 GSD agents now discover and use project-scoped skills
+- **Superpowers integration** — Specialist skills library (`skills/`) + 7 new `sp-*` commands: brainstorming, TDD, subagent-driven dev, parallel dispatch, git worktrees, branch finishing, and code-review reception
 - **30+ bug fixes** — Worktree safety, state management, installer paths, and health check optimizations
 
 ---
@@ -640,7 +641,21 @@ You're never locked in. The system adapts.
 | Command | What it does |
 |---------|--------------|
 | `/gsd-workstreams` | Manage parallel workstreams (list, create, switch, status, progress, complete) |
+### Superpowers Skills & Workflows
 
+Specialist skills and workflows integrated from the [Superpowers for Copilot](https://github.com/biground/superpowers4copilot) project.
+
+| Command | What it does |
+|---------|------------|
+| `/gsd:sp-brainstorm` | Collaborative brainstorming — idea → design spec before writing any code |
+| `/gsd:sp-tdd` | TDD workflow — strict Red-Green-Refactor discipline |
+| `/gsd:sp-subagent` | Subagent-driven development — dispatch independent agents per step |
+| `/gsd:sp-parallel` | Parallel agent dispatch — 3+ independent tasks run simultaneously |
+| `/gsd:sp-worktree` | Git worktree management — develop in isolated environments |
+| `/gsd:sp-branch-finish` | Finish development branch — clean up, squash, prepare for merge |
+| `/gsd:sp-code-review-recv` | Receive code review feedback — process review comments and fix |
+
+> Skills are loaded from `skills/` (e.g. `skills/brainstorming/SKILL.md`). Each `sp-*` command reads the corresponding skill file and follows its workflow.
 ### Code Quality
 
 | Command | What it does |

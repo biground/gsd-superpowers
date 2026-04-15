@@ -73,15 +73,15 @@ GSD 解决的就是这个问题。它是让 Claude Code 变得可靠的上下文
 
 适合那些想把自己的需求说明白，然后让系统正确构建出来的人，而不是假装自己在运营一个 50 人工程组织的人。
 
-### v1.32.0 亮点
+### v1.36.0 亮点
 
-- **STATE.md 一致性检查** — `state validate` 检测 STATE.md 与文件系统之间的偏差；`state sync` 从实际项目状态重建
-- **`--to N` 标志** — 在完成特定阶段后停止自主执行
-- **研究门控** — 当 RESEARCH.md 有未解决的开放问题时阻止规划
-- **验证里程碑范围过滤** — 后续阶段将处理的差距标记为"延迟"而非差距
-- **读取后编辑保护** — 咨询性 hook 防止非 Claude 运行时的无限重试循环
-- **上下文缩减** — Markdown 截断和缓存友好的 prompt 排序，降低 token 使用量
-- **4 个新运行时** — Trae、Kilo、Augment 和 Cline（共 12 个运行时）
+- **知识图谱集成** — `/gsd-graphify` 为规划代理引入知识图谱能力，丰富上下文关联
+- **SDK 类型化查询基础** — 基于注册表的 `gsd-sdk query` 命令，带分类错误和处理程序
+- **TDD 流水线模式** — `--tdd` 标志可选开启测试驱动开发工作流
+- **上下文感知的提示剔减** — 针对 200K 以下模型自动缩减提示词大小
+- **项目技能感知** — 9 个 GSD 代理现在可自动发现并加载项目级技能
+- **Superpowers 集成** — 专业技能库（`skills/`）+ 7 个新的 `sp-*` 命令：头脑风暴、TDD、子代理驱动开发、并行调度、Git worktree、分支收尾、接收代码审查
+- **30+ bug 修复** — worktree 安全性、状态管理、安装路径、健康检查优化
 
 ---
 
@@ -592,6 +592,22 @@ lmn012o feat(08-02): create registration endpoint
 | `/gsd-remove-phase [N]` | 删除未来 phase，并重编号 |
 | `/gsd-list-phase-assumptions [N]` | 在规划前查看 Claude 打算采用的方案 |
 | `/gsd-plan-milestone-gaps` | 为 audit 发现的缺口创建 phase |
+
+### Superpowers 技能与工作流
+
+集成自 [Superpowers for Copilot](https://github.com/biground/superpowers4copilot) 项目的专业技能和工作流。
+
+| 命令 | 作用 |
+|------|------|
+| `/gsd:sp-brainstorm` | 协作式头脑风暴——在编写任何代码前，将想法转化为设计方案 |
+| `/gsd:sp-tdd` | TDD 工作流——严格的 Red-Green-Refactor 纪律 |
+| `/gsd:sp-subagent` | 子代理驱动开发——每步派遣独立代理完成任务 |
+| `/gsd:sp-parallel` | 并行代理调度——3+ 个独立任务同时执行 |
+| `/gsd:sp-worktree` | Git Worktree 管理——在隔离环境中开发 |
+| `/gsd:sp-branch-finish` | 完成开发分支——清理、squash、合并准备 |
+| `/gsd:sp-code-review-recv` | 接收代码审查反馈——处理审查意见并修复 |
+
+> 技能文件位于 `skills/` 目录（如 `skills/brainstorming/SKILL.md`）。每个 `sp-*` 命令会读取对应的 SKILL.md 并遵循其工作流。
 
 ### 代码质量
 
