@@ -27,8 +27,12 @@ const {
   copyCommandsAsCopilotSkills,
   GSD_COPILOT_INSTRUCTIONS_MARKER,
   GSD_COPILOT_INSTRUCTIONS_CLOSE_MARKER,
+  GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER,
+  GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER,
   mergeCopilotInstructions,
   stripGsdFromCopilotInstructions,
+  mergeCopilotGlobalInstructions,
+  stripGsdFromCopilotGlobalInstructions,
   writeManifest,
   reportLocalPatches,
 } = require('../bin/install.js');
@@ -950,6 +954,65 @@ describe('Copilot instructions merge/strip', () => {
   });
 });
 
+describe('Copilot global instructions merge/strip', () => {
+  const gsdContent = '- Reply in Simplified Chinese\n- Use ask_user for follow-up choices';
+
+  function makeGsdBlock(content) {
+    return GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER + '\n' + content.trim() + '\n' + GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER;
+  }
+
+  test('creates file from scratch when none exists', () => {
+    const tmpMergeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-global-merge-'));
+    const filePath = path.join(tmpMergeDir, 'global.instructions.md');
+    mergeCopilotGlobalInstructions(filePath, gsdContent);
+
+    const result = fs.readFileSync(filePath, 'utf8');
+    assert.ok(result.includes(GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER), 'has opening marker');
+    assert.ok(result.includes(GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER), 'has closing marker');
+    assert.ok(result.includes('Reply in Simplified Chinese'), 'has GSD content');
+
+    fs.rmSync(tmpMergeDir, { recursive: true, force: true });
+  });
+
+  test('replaces existing managed block and preserves user content', () => {
+    const tmpMergeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-global-merge-'));
+    const filePath = path.join(tmpMergeDir, 'global.instructions.md');
+    const oldContent = '# User Rules\n\n' +
+      makeGsdBlock('- old GSD content') +
+      '\n\n# Personal Notes\n';
+    fs.writeFileSync(filePath, oldContent);
+
+    mergeCopilotGlobalInstructions(filePath, gsdContent);
+    const result = fs.readFileSync(filePath, 'utf8');
+
+    assert.ok(result.includes('# User Rules'), 'content before preserved');
+    assert.ok(result.includes('# Personal Notes'), 'content after preserved');
+    assert.ok(!result.includes('old GSD content'), 'old managed content removed');
+    assert.ok(result.includes('Use ask_user for follow-up choices'), 'new managed content inserted');
+
+    fs.rmSync(tmpMergeDir, { recursive: true, force: true });
+  });
+
+  test('returns null when content is GSD-only', () => {
+    const content = makeGsdBlock('- GSD-only content') + '\n';
+    const result = stripGsdFromCopilotGlobalInstructions(content);
+    assert.strictEqual(result, null, 'returns null for GSD-only content');
+  });
+
+  test('removes only managed section when user content exists', () => {
+    const content = '# User Rules\n\nMy custom setup.\n\n' +
+      makeGsdBlock('- managed content') +
+      '\n';
+    const result = stripGsdFromCopilotGlobalInstructions(content);
+
+    assert.ok(result !== null, 'does not return null');
+    assert.ok(result.includes('# User Rules'), 'user content preserved');
+    assert.ok(result.includes('My custom setup.'), 'user text preserved');
+    assert.ok(!result.includes('managed content'), 'managed content removed');
+    assert.ok(!result.includes(GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER), 'markers removed');
+  });
+});
+
 // ─── Copilot uninstall skill removal ───────────────────────────────────────────
 
 describe('Copilot uninstall skill removal', () => {
@@ -1124,11 +1187,33 @@ function runCopilotInstall(cwd) {
   });
 }
 
+function runCopilotGlobalInstall(configDir) {
+  const env = { ...process.env, COPILOT_CONFIG_DIR: configDir };
+  delete env.GSD_TEST_MODE;
+  return execFileSync(process.execPath, [INSTALL_PATH, '--copilot', '--global'], {
+    cwd: configDir,
+    encoding: 'utf-8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env,
+  });
+}
+
 function runCopilotUninstall(cwd) {
   const env = { ...process.env };
   delete env.GSD_TEST_MODE;
   return execFileSync(process.execPath, [INSTALL_PATH, '--copilot', '--local', '--uninstall'], {
     cwd,
+    encoding: 'utf-8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env,
+  });
+}
+
+function runCopilotGlobalUninstall(configDir) {
+  const env = { ...process.env, COPILOT_CONFIG_DIR: configDir };
+  delete env.GSD_TEST_MODE;
+  return execFileSync(process.execPath, [INSTALL_PATH, '--copilot', '--global', '--uninstall'], {
+    cwd: configDir,
     encoding: 'utf-8',
     stdio: ['pipe', 'pipe', 'pipe'],
     env,
@@ -1185,6 +1270,7 @@ describe('E2E: Copilot full install verification', () => {
       'gsd-code-fixer.agent.md',
       'gsd-code-reviewer.agent.md',
       'gsd-codebase-mapper.agent.md',
+      'gsd-critic.agent.md',
       'gsd-debug-session-manager.agent.md',
       'gsd-debugger.agent.md',
       'gsd-doc-verifier.agent.md',
@@ -1222,6 +1308,11 @@ describe('E2E: Copilot full install verification', () => {
       'Should contain GSD Configuration open marker');
     assert.ok(content.includes('<!-- /GSD Configuration -->'),
       'Should contain GSD Configuration close marker');
+  });
+
+  test('does not create global.instructions.md for local install', () => {
+    const globalInstrPath = path.join(tmpDir, 'instructions', 'global.instructions.md');
+    assert.ok(!fs.existsSync(globalInstrPath), 'local install should not create global instructions');
   });
 
   test('creates manifest with correct structure', () => {
@@ -1366,6 +1457,35 @@ describe('E2E: Copilot uninstall verification', () => {
       assert.ok(fs.existsSync(customAgentPath),
         'Non-GSD agent file should be preserved after uninstall');
     });
+  });
+});
+
+describe('E2E: Copilot global install verification', () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gsd-copilot-global-'));
+    runCopilotGlobalInstall(tmpDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test('generates instructions/global.instructions.md with GSD markers', () => {
+    const instrPath = path.join(tmpDir, 'instructions', 'global.instructions.md');
+    assert.ok(fs.existsSync(instrPath), 'global.instructions.md should exist');
+    const content = fs.readFileSync(instrPath, 'utf8');
+    assert.ok(content.includes(GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER), 'should contain opening marker');
+    assert.ok(content.includes(GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER), 'should contain closing marker');
+    assert.ok(content.includes('Simplified Chinese'), 'should contain language instruction');
+    assert.ok(content.includes('ask_user'), 'should contain Copilot ask_user guidance');
+  });
+
+  test('removes global.instructions.md on uninstall', () => {
+    runCopilotGlobalUninstall(tmpDir);
+    const instrPath = path.join(tmpDir, 'instructions', 'global.instructions.md');
+    assert.ok(!fs.existsSync(instrPath), 'global.instructions.md should not exist after uninstall');
   });
 });
 

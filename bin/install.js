@@ -20,6 +20,8 @@ const GSD_CODEX_HOOKS_OWNERSHIP_PREFIX = '# GSD codex_hooks ownership: ';
 // Copilot instructions marker constants
 const GSD_COPILOT_INSTRUCTIONS_MARKER = '<!-- GSD Configuration \u2014 managed by get-shit-done installer -->';
 const GSD_COPILOT_INSTRUCTIONS_CLOSE_MARKER = '<!-- /GSD Configuration -->';
+const GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER = '<!-- GSD Global Instructions \u2014 managed by get-shit-done installer -->';
+const GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER = '<!-- /GSD Global Instructions -->';
 
 const CODEX_AGENT_SANDBOX = {
   'gsd-executor': 'workspace-write',
@@ -2950,6 +2952,63 @@ function stripGsdFromCopilotInstructions(content) {
 }
 
 /**
+ * Merge GSD instructions into Copilot global instructions.
+ * Three cases: new file, existing with markers, existing without markers.
+ * @param {string} filePath - Full path to global.instructions.md
+ * @param {string} gsdContent - Template content (without markers)
+ */
+function mergeCopilotGlobalInstructions(filePath, gsdContent) {
+  const gsdBlock = GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER + '\n' +
+    gsdContent.trim() + '\n' +
+    GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER;
+
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, gsdBlock + '\n');
+    return;
+  }
+
+  const existing = fs.readFileSync(filePath, 'utf8');
+  const openIndex = existing.indexOf(GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER);
+  const closeIndex = existing.indexOf(GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER);
+
+  if (openIndex !== -1 && closeIndex !== -1) {
+    const before = existing.substring(0, openIndex).trimEnd();
+    const after = existing.substring(closeIndex + GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER.length).trimStart();
+    let newContent = '';
+    if (before) newContent += before + '\n\n';
+    newContent += gsdBlock;
+    if (after) newContent += '\n\n' + after;
+    newContent += '\n';
+    fs.writeFileSync(filePath, newContent);
+    return;
+  }
+
+  const content = existing.trimEnd() + '\n\n' + gsdBlock + '\n';
+  fs.writeFileSync(filePath, content);
+}
+
+/**
+ * Strip GSD section from Copilot global instructions.
+ * Returns cleaned content, or null if file should be deleted (was GSD-only).
+ * @param {string} content - File content
+ * @returns {string|null} - Cleaned content or null if empty
+ */
+function stripGsdFromCopilotGlobalInstructions(content) {
+  const openIndex = content.indexOf(GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER);
+  const closeIndex = content.indexOf(GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER);
+
+  if (openIndex !== -1 && closeIndex !== -1) {
+    const before = content.substring(0, openIndex).trimEnd();
+    const after = content.substring(closeIndex + GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER.length).trimStart();
+    const cleaned = (before + (before && after ? '\n\n' : '') + after).trim();
+    if (!cleaned) return null;
+    return cleaned + '\n';
+  }
+
+  return content;
+}
+
+/**
  * Generate config.toml and per-agent .toml files for Codex.
  * Reads agent .md files from source, extracts metadata, writes .toml configs.
  */
@@ -4526,6 +4585,28 @@ function uninstall(isGlobal, runtime = 'claude') {
         console.log(`  ${green}✓${reset} Cleaned GSD section from copilot-instructions.md`);
       }
     }
+
+    if (isGlobal) {
+      const globalInstructionsDir = path.join(targetDir, 'instructions');
+      const globalInstructionsPath = path.join(globalInstructionsDir, 'global.instructions.md');
+      if (fs.existsSync(globalInstructionsPath)) {
+        const content = fs.readFileSync(globalInstructionsPath, 'utf8');
+        const cleaned = stripGsdFromCopilotGlobalInstructions(content);
+        if (cleaned === null) {
+          fs.unlinkSync(globalInstructionsPath);
+          removedCount++;
+          console.log(`  ${green}✓${reset} Removed instructions/global.instructions.md (was GSD-only)`);
+        } else if (cleaned !== content) {
+          fs.writeFileSync(globalInstructionsPath, cleaned);
+          removedCount++;
+          console.log(`  ${green}✓${reset} Cleaned GSD section from instructions/global.instructions.md`);
+        }
+
+        if (fs.existsSync(globalInstructionsDir) && fs.readdirSync(globalInstructionsDir).length === 0) {
+          fs.rmSync(globalInstructionsDir, { recursive: true, force: true });
+        }
+      }
+    }
   } else if (isAntigravity) {
     // Antigravity: remove skills/gsd-*/ directories (same layout as Copilot skills)
     const skillsDir = path.join(targetDir, 'skills');
@@ -5966,6 +6047,17 @@ function install(isGlobal, runtime = 'claude') {
       mergeCopilotInstructions(instructionsPath, template);
       console.log(`  ${green}✓${reset} Generated copilot-instructions.md`);
     }
+    if (isGlobal) {
+      const globalTemplatePath = path.join(targetDir, 'get-shit-done', 'templates', 'global.instructions.md');
+      const globalInstructionsDir = path.join(targetDir, 'instructions');
+      const globalInstructionsPath = path.join(globalInstructionsDir, 'global.instructions.md');
+      if (fs.existsSync(globalTemplatePath)) {
+        fs.mkdirSync(globalInstructionsDir, { recursive: true });
+        const template = fs.readFileSync(globalTemplatePath, 'utf8');
+        mergeCopilotGlobalInstructions(globalInstructionsPath, template);
+        console.log(`  ${green}✓${reset} Generated instructions/global.instructions.md`);
+      }
+    }
     // Copilot: no settings.json, no hooks, no statusline (like Codex)
     return { settingsPath: null, settings: null, statuslineCommand: null, runtime, configDir: targetDir };
   }
@@ -6628,8 +6720,12 @@ if (process.env.GSD_TEST_MODE) {
     copyCommandsAsCopilotSkills,
     GSD_COPILOT_INSTRUCTIONS_MARKER,
     GSD_COPILOT_INSTRUCTIONS_CLOSE_MARKER,
+    GSD_COPILOT_GLOBAL_INSTRUCTIONS_MARKER,
+    GSD_COPILOT_GLOBAL_INSTRUCTIONS_CLOSE_MARKER,
     mergeCopilotInstructions,
     stripGsdFromCopilotInstructions,
+    mergeCopilotGlobalInstructions,
+    stripGsdFromCopilotGlobalInstructions,
     convertClaudeToAntigravityContent,
     convertClaudeCommandToAntigravitySkill,
     convertClaudeAgentToAntigravityAgent,

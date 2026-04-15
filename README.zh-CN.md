@@ -102,7 +102,7 @@ npx get-shit-done-cc@latest
 - Cline：GSD 通过 `.clinerules` 安装 — 检查 `.clinerules` 是否存在
 
 > [!NOTE]
-> Claude Code 2.1.88+、Qwen Code 和 Codex 以 skill 形式安装（`skills/gsd-*/SKILL.md`）。Copilot 全局安装到 `~/.copilot/`，本地安装到 `./.github/`，并会生成 `copilot-instructions.md`，同时把命令名从 `gsd:*` 规范化为 `gsd-*`。旧版 Claude Code 仍使用 `commands/gsd/`。Cline 使用 `.clinerules`。安装器会自动处理所有格式。
+> Claude Code 2.1.88+、Qwen Code 和 Codex 以 skill 形式安装（`skills/gsd-*/SKILL.md`）。Copilot 全局安装到 `~/.copilot/`，本地安装到 `./.github/`，并会生成 `copilot-instructions.md`，同时把命令名从 `gsd:*` 规范化为 `gsd-*`。Copilot 全局安装还会合并 `instructions/global.instructions.md`，作为跨工作区生效的默认全局指令。旧版 Claude Code 仍使用 `commands/gsd/`。Cline 使用 `.clinerules`。安装器会自动处理所有格式。
 
 > [!TIP]
 > 基于源码安装或无法使用 npm 的环境，请参阅 **[docs/manual-update.md](docs/manual-update.md)**。
@@ -808,7 +808,7 @@ GSD 的代码库映射和分析命令会读取文件来理解你的项目。**�
 **安装后找不到命令？**
 - 重启你的运行时，让命令或 skills 重新加载
 - 对 Claude Code 2.1.88+，检查 `~/.claude/skills/gsd-*/SKILL.md`；旧版 Claude Code 再检查 `~/.claude/commands/gsd/`
-- 对 Copilot，检查 GSD 文件是否出现在 `~/.copilot/`（全局）或 `./.github/`（本地），并确认 `copilot-instructions.md` 已生成
+- 对 Copilot，检查 GSD 文件是否出现在 `~/.copilot/`（全局）或 `./.github/`（本地），并确认 `copilot-instructions.md` 已生成；全局安装还应看到 `~/.copilot/instructions/global.instructions.md`
 - 对 Codex，检查 skills 是否存在于 `~/.codex/skills/gsd-*/SKILL.md`（全局）或 `./.codex/skills/gsd-*/SKILL.md`（本地）
 
 **命令行为不符合预期？**

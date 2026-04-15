@@ -118,7 +118,7 @@ Verify with:
 - Cline: GSD installs via `.clinerules` — verify by checking `.clinerules` exists
 
 > [!NOTE]
-> Claude Code 2.1.88+, Qwen Code, and Codex install as skills (`skills/gsd-*/SKILL.md`). Copilot installs into `~/.copilot/` (global) or `./.github/` (local), generates `copilot-instructions.md`, and normalizes command names from `gsd:*` to `gsd-*`. Older Claude Code versions use `commands/gsd/`. Cline uses `.clinerules` for configuration. The installer handles all formats automatically.
+> Claude Code 2.1.88+, Qwen Code, and Codex install as skills (`skills/gsd-*/SKILL.md`). Copilot installs into `~/.copilot/` (global) or `./.github/` (local), generates `copilot-instructions.md`, and normalizes command names from `gsd:*` to `gsd-*`. Global Copilot installs also merge `instructions/global.instructions.md` for cross-workspace defaults. Older Claude Code versions use `commands/gsd/`. Cline uses `.clinerules` for configuration. The installer handles all formats automatically.
 
 > [!TIP]
 > For source-based installs or environments where npm is unavailable, see **[docs/manual-update.md](docs/manual-update.md)**.
@@ -847,7 +847,7 @@ This prevents Claude from reading these files entirely, regardless of what comma
 **Commands not found after install?**
 - Restart your runtime to reload commands/skills
 - Verify files exist in `~/.claude/skills/gsd-*/SKILL.md` (Claude Code 2.1.88+) or `~/.claude/commands/gsd/` (legacy)
-- For Copilot, verify GSD files exist under `~/.copilot/` (global) or `./.github/` (local), and `copilot-instructions.md` was generated
+- For Copilot, verify GSD files exist under `~/.copilot/` (global) or `./.github/` (local), `copilot-instructions.md` was generated, and global installs also created `~/.copilot/instructions/global.instructions.md`
 - For Codex, verify skills exist in `~/.codex/skills/gsd-*/SKILL.md` (global) or `./.codex/skills/gsd-*/SKILL.md` (local)
 
 **Commands not working as expected?**
