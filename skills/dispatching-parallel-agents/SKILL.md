@@ -3,6 +3,9 @@ name: dispatching-parallel-agents
 description: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 分派并行代理（Dispatching Parallel Agents）
 
 ## 概述

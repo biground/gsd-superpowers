@@ -3,6 +3,9 @@ name: narrative-writing
 description: Workflow for creating shareable, time-proof technical notes in Obsidian. Covers context anchoring, vault knowledge linking, editorial polish, and MCP operations. Pair with narrative-writer agent for writing execution.
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 叙事笔记工作流
 
 创建**可分享、经得起时间考验**的技术笔记。写作哲学在 `narrative-writer` agent 中，本 skill 聚焦操作流程。

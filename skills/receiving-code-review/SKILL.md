@@ -3,6 +3,9 @@ name: receiving-code-review
 description: 当收到代码审查反馈、在实施建议之前使用，尤其是反馈看起来不清楚或技术上有疑问时——需要技术严谨性和验证，而非表演性认同或盲目实施
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 代码审查接收
 
 ## 概述

@@ -4,7 +4,7 @@
 
 **用途：** 验证规格文档是否完整、一致，并且已准备好进入实施规划阶段。
 
-**派遣时机：** 规格文档已写入 docs/superpowers/specs/
+**派遣时机：** 规格文档已写入 docs/specs/
 
 ```
 Task tool (general-purpose):

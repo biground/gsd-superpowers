@@ -3,6 +3,9 @@ name: finishing-a-development-branch
 description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 完成开发分支（Finishing a Development Branch）
 
 ## 概述

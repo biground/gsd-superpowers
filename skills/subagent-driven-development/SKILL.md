@@ -3,6 +3,9 @@ name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 子代理驱动开发（Subagent-Driven Development）
 
 通过为每个任务分派全新的子代理（subagent）来执行计划，每个任务完成后进行两阶段审查：先审查规格合规性（spec compliance），再审查代码质量。
@@ -128,7 +131,7 @@ digraph process {
 ```
 你：我正在使用子代理驱动开发来执行这个计划。
 
-[读取计划文件一次：docs/superpowers/plans/feature-plan.md]
+[读取计划文件一次：docs/plans/feature-plan.md]
 [提取所有5个任务的完整文本和上下文]
 [创建包含所有任务的 TodoWrite]
 

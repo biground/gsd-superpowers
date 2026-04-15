@@ -3,6 +3,9 @@ name: brainstorming
 description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 头脑风暴：从想法到设计
 
 通过自然的协作对话，帮助将想法转化为完整的设计和 spec（规格文档）。
@@ -26,7 +29,7 @@ description: "You MUST use this before any creative work - creating features, bu
 3. **提出澄清性问题** — 逐个提问，理解目的/约束/成功标准
 4. **提出 2-3 种方案** — 包含权衡分析和你的推荐
 5. **展示设计** — 按各部分的复杂度调整篇幅，每个部分展示后获取用户确认
-6. **编写设计文档** — 保存到 `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` 并提交
+6. **编写设计文档** — 保存到 `docs/specs/YYYY-MM-DD-<topic>-design.md` 并提交
 7. **Spec 自审** — 快速内联检查占位符、矛盾、歧义、范围（见下文）
 8. **用户审阅已编写的 spec** — 请用户在继续之前审阅 spec 文件
 9. **过渡到实现** — 调用 writing-plans 技能来创建实现计划
@@ -108,7 +111,7 @@ digraph brainstorming {
 
 **文档：**
 
-- 将验证通过的设计（spec）写入 `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- 将验证通过的设计（spec）写入 `docs/specs/YYYY-MM-DD-<topic>-design.md`
   - （用户对 spec 存放位置的偏好会覆盖此默认值）
 - 如果可用，使用 elements-of-style:writing-clearly-and-concisely 技能
 - 将设计文档提交到 `git`

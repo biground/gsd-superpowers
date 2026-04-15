@@ -3,6 +3,9 @@ name: writing-skills
 description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 编写技能（Writing Skills）
 
 ## 概述

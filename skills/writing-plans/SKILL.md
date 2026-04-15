@@ -3,6 +3,9 @@ name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 编写计划
 
 ## 概述
@@ -15,7 +18,7 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 **上下文：** 这应该在专用的 worktree（由 brainstorming 技能创建）中运行。
 
-**计划保存位置：** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+**计划保存位置：** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - （用户对计划位置的偏好将覆盖此默认值）
 
 ## 范围检查
@@ -135,7 +138,7 @@ git commit -m "feat: add specific feature"
 
 保存计划后，提供执行选择：
 
-**"计划已完成并保存到 `docs/superpowers/plans/<filename>.md`。两种执行选项：**
+**"计划已完成并保存到 `docs/plans/<filename>.md`。两种执行选项：**
 
 **1. 子智能体驱动（推荐）** - 我为每个任务派遣一个全新的子智能体，任务间进行审查，快速迭代
 

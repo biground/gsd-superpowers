@@ -3,6 +3,9 @@ name: requesting-code-review
 description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 ---
 
+> **Runtime Note:** 本技能的工具名称使用 VS Code Copilot 格式。  
+> Claude Code 对照：`read_file` → Read | `replace_string_in_file/create_file` → Write | `run_in_terminal` → Bash | `runSubagent` → Task | `vscode_askQuestions` → TodoWrite/AskUserQuestion | `grep_search` → Grep | `file_search` → Glob
+
 # 请求代码审查
 
 分派 superpowers:code-reviewer 子代理（subagent）在问题蔓延之前捕获它们。审查者获得的是精心构建的评估上下文——而非你的会话历史。这使审查者专注于工作成果而非你的思考过程，同时保留你自己的上下文以便继续工作。
@@ -58,7 +61,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 
 [分派 superpowers:code-reviewer 子代理]
   WHAT_WAS_IMPLEMENTED: 会话索引的验证和修复函数
-  PLAN_OR_REQUIREMENTS: docs/superpowers/plans/deployment-plan.md 中的任务 2
+  PLAN_OR_REQUIREMENTS: docs/plans/deployment-plan.md 中的任务 2
   BASE_SHA: a7981ec
   HEAD_SHA: 3df7661
   DESCRIPTION: 添加了 verifyIndex() 和 repairIndex()，支持 4 种问题类型
