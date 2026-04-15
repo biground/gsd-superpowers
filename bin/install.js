@@ -5705,6 +5705,33 @@ function install(isGlobal, runtime = 'claude') {
     }
   }
 
+  // Copy skills/ directory (recursive copy with path replacements)
+  const gsdSkillsSrc = path.join(src, 'skills');
+  if (fs.existsSync(gsdSkillsSrc)) {
+    const gsdSkillsDest = path.join(targetDir, 'skills');
+    // Ensure skills/ dir exists (may already exist from commands-as-skills above)
+    fs.mkdirSync(gsdSkillsDest, { recursive: true });
+
+    // Copy each skill subdirectory
+    const skillEntries = fs.readdirSync(gsdSkillsSrc, { withFileTypes: true });
+    for (const entry of skillEntries) {
+      if (entry.isDirectory()) {
+        const skillSrcPath = path.join(gsdSkillsSrc, entry.name);
+        const skillDestPath = path.join(gsdSkillsDest, entry.name);
+        copyWithPathReplacement(skillSrcPath, skillDestPath, pathPrefix, runtime, false, isGlobal);
+      }
+    }
+
+    // Count installed skill directories (those containing SKILL.md)
+    const installedSkills = fs.readdirSync(gsdSkillsDest, { withFileTypes: true })
+      .filter(e => e.isDirectory() && fs.existsSync(path.join(gsdSkillsDest, e.name, 'SKILL.md')));
+    if (installedSkills.length > 0) {
+      console.log(`  ${green}✓${reset} Installed ${installedSkills.length} GSD skills to skills/`);
+    } else {
+      failures.push('skills/ (GSD skills)');
+    }
+  }
+
   // Copy CHANGELOG.md
   const changelogSrc = path.join(src, 'CHANGELOG.md');
   const changelogDest = path.join(targetDir, 'get-shit-done', 'CHANGELOG.md');
