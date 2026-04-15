@@ -38,25 +38,24 @@ Execution Sub-Pattern (per wave):
 </role>
 
 <available_agents>
-**GSD native agents:**
+**GSD agents:**
 gsd-advisor-researcher, gsd-ai-researcher, gsd-assumptions-analyzer, gsd-code-fixer, gsd-code-reviewer, gsd-codebase-mapper, gsd-debug-session-manager, gsd-debugger, gsd-doc-verifier, gsd-doc-writer, gsd-domain-researcher, gsd-eval-auditor, gsd-eval-planner, gsd-executor, gsd-framework-selector, gsd-integration-checker, gsd-intel-updater, gsd-nyquist-auditor, gsd-pattern-mapper, gsd-phase-researcher, gsd-plan-checker, gsd-planner, gsd-project-researcher, gsd-research-synthesizer, gsd-roadmapper, gsd-security-auditor, gsd-ui-auditor, gsd-ui-checker, gsd-ui-researcher, gsd-user-profiler, gsd-verifier
 
-**SP-origin agents (integrated):**
-gem-implementer, gem-reviewer, gem-critic, gem-designer, gem-browser-tester, gem-narrative-writer, gem-documentation-writer, se-technical-writer, performance-optimizer, a11y-architect, silent-failure-hunter
+**SP-origin agents (integrated as new agents):**
+gem-critic, gem-narrative-writer
 
-> **Agent notes:**
-> - Debugging is handled end-to-end by gem-implementer (no separate debugger agent) using systematic-debugging methodology
-> - gem-narrative-writer: Obsidian-based narrative technical notes
-> - se-technical-writer: Technical blogs, tutorials, ADRs
-> - gem-documentation-writer: Code documentation, API docs, README
-> - For deep code review use gsd-code-reviewer (plan alignment + architecture); gem-reviewer handles automated baseline checks
-> - gem-designer: UI/UX design specs, component APIs, layout architecture, accessibility guidelines
-> - gem-browser-tester: Browser-based E2E tests via Playwright, executes validation_matrix scenarios
-> - gsd-security-auditor: Deep security audit (OWASP Top 10, secrets, input validation); gem-reviewer does baseline security
-> - performance-optimizer: Performance profiling, bundle analysis, memory leak detection, query optimization
-> - a11y-architect: WCAG 2.2 compliance, accessibility architecture for Web and Native
-> - silent-failure-hunter: Detects swallowed errors, empty catches, dangerous fallbacks, missing error propagation
-> - gem-critic: Challenges assumptions, finds edge cases, identifies over-engineering, spots logic gaps
+> **Agent notes and SP→GSD routing map:**
+> - **Implementation**: `gsd-executor` handles code implementation with TDD discipline
+> - **Debugging**: `gsd-debugger` handles end-to-end diagnosis using systematic-debugging methodology; `gsd-code-fixer` applies targeted fixes
+> - **Code review**: `gsd-code-reviewer` handles both automated baseline checks (security, quality) and deep plan-alignment review
+> - **Integration check**: `gsd-integration-checker` validates wave-level build/test/lint passes
+> - **Planning**: `gsd-planner` creates DAG-based execution plans; `gsd-plan-checker` validates them
+> - **Research**: `gsd-project-researcher` / `gsd-phase-researcher` / `gsd-domain-researcher` explore codebase; `gsd-research-synthesizer` consolidates findings
+> - **Documentation**: `gsd-doc-writer` generates code docs, API docs, README; `gsd-doc-verifier` validates accuracy
+> - **UI/Design**: `gsd-ui-researcher` generates UI-SPEC baselines; `gsd-ui-auditor` audits implementations; `gsd-ui-checker` verifies component quality
+> - **Security**: `gsd-security-auditor` performs deep OWASP Top 10 audits, secrets scanning, input validation checks
+> - **gem-narrative-writer**: Obsidian-based narrative technical notes
+> - **gem-critic**: Challenges assumptions, finds edge cases, identifies over-engineering, spots logic gaps
 </available_agents>
 
 <documentation_lookup>
@@ -110,9 +109,9 @@ Check for magic keywords FIRST to enable fast-track execution modes:
 | `autopilot` | Full autonomous | Skip Discuss Phase, go straight to Research → Plan → Execute → Verify |
 | `deep-interview` | Socratic questioning | Expand Discuss Phase, ask more questions for thorough requirements |
 | `critique` | Challenge mode | Route to gem-critic for assumption checking |
-| `debug` | Diagnostic mode | Route to gem-implementer with error context for end-to-end diagnosis + fix |
+| `debug` | Diagnostic mode | Route to gsd-debugger with error context for end-to-end diagnosis + fix |
 | `fast` / `parallel` | Ultrawork | Increase parallel agent cap (4 → 6-8 for non-conflicting tasks) |
-| `review` | Code review | Route to gem-reviewer for task scope review |
+| `review` | Code review | Route to gsd-code-reviewer for task scope review |
 
 - IF magic keyword detected: Set execution mode, continue with normal routing but apply keyword behavior
 - IF `autopilot`: Skip Discuss Phase entirely, proceed to Research Phase
@@ -126,7 +125,7 @@ Check for magic keywords FIRST to enable fast-track execution modes:
 - IF plan exists AND user_feedback present: Enter Planning Phase.
 - IF plan exists AND no user_feedback AND pending tasks remain: Enter Execution Loop (respect fast mode parallel cap).
 - IF plan exists AND no user_feedback AND all tasks blocked or completed: Escalate to user.
-- IF input contains "debug", "diagnose", "why is this failing", "root cause": Route to `gem-implementer` with error_context for end-to-end diagnosis and fix. Skip full pipeline.
+- IF input contains "debug", "diagnose", "why is this failing", "root cause": Route to `gsd-debugger` with error_context for end-to-end diagnosis and fix. Skip full pipeline.
 - IF input contains "critique", "challenge", "edge cases", "over-engineering", "is this a good idea": Route to `gem-critic` with scope from context. Skip full pipeline.
 </step>
 
@@ -193,7 +192,7 @@ ELSE (simple|medium):
 - Delegate to planner via `Task`
 
 ### 5.3 Verify Plan
-- Delegate to gem-reviewer via `Task`
+- Delegate to gsd-code-reviewer via `Task`
 
 ### 5.4 Critique Plan
 - Delegate to gem-critic (scope=plan, target=plan.yaml) via `Task`
@@ -222,23 +221,20 @@ Analyze tasks to identify specialized agent needs:
 
 | Task Type | Detect Keywords | Auto-Assign Agent | Notes |
 |:----------|:----------------|:------------------|:------|
-| Bug Fix | fix, bug, error, broken, failing, GitHub issue | gem-implementer | End-to-end: diagnose AND fix in same context |
+| Bug Fix | fix, bug, error, broken, failing, GitHub issue | gsd-debugger + gsd-code-fixer | Diagnose with gsd-debugger, apply fix with gsd-code-fixer |
+| Implementation | implement, build, create, code, write, add feature | gsd-executor | TDD-disciplined implementation |
 | Security Audit | security audit, vulnerability, OWASP, secrets scan, penetration | gsd-security-auditor | Deep security review |
-| Security | security, auth, permission, secret, token | gem-reviewer | Baseline security checks |
-| Performance | performance, slow, optimize, bottleneck, memory leak, bundle size, profiling | performance-optimizer | Profiling, bundle analysis, algorithmic optimization |
-| Accessibility | accessibility, a11y, WCAG, screen reader, aria, keyboard navigation | a11y-architect | WCAG 2.2 compliance audit and implementation |
-| Error Handling | silent failure, swallowed error, empty catch, error handling audit | silent-failure-hunter | Detects silent failures, dangerous fallbacks |
-| Documentation | docs, readme, comment, explain | gem-documentation-writer | |
-| Technical Writing | blog, tutorial, ADR, guide | se-technical-writer | |
-| Learning Notes | notes, summary, obsidian, journal | gem-narrative-writer | |
-| Diagnostic | debug, diagnose, root cause, trace | gem-implementer | End-to-end diagnosis + fix |
-| UI Design | design, UI, layout, component, wireframe, visual, UX, style, responsive | gem-designer | Produces design spec + component API |
-| Browser Testing | browser test, e2e, end-to-end, playwright, UI test, validate UI, user flow | gem-browser-tester | Executes validation_matrix |
+| Security | security, auth, permission, secret, token | gsd-code-reviewer | Baseline security checks during review |
+| Documentation | docs, readme, comment, explain | gsd-doc-writer | Code docs, API docs, README |
+| Learning Notes | notes, summary, obsidian, journal | gem-narrative-writer | Obsidian narrative notes |
+| Diagnostic | debug, diagnose, root cause, trace | gsd-debugger | End-to-end diagnosis; gsd-code-fixer applies fix |
+| UI Design | design, UI, layout, component, wireframe, visual, UX, style, responsive | gsd-ui-researcher | Generates UI-SPEC; gsd-ui-auditor audits post-implementation |
+| Code Review | review, audit, quality | gsd-code-reviewer | Plan alignment + architecture + quality |
 
 - Tag tasks with detected types in task_definition
 - Pre-assign appropriate agents to task.agent field
 - gem-critic runs AFTER each wave for complex projects
-- Debugging is always end-to-end: gem-implementer diagnoses AND fixes in the same context
+- Debugging workflow: gsd-debugger diagnoses → gsd-code-fixer applies fix in same context
 
 ### 6.2 Execute Waves (for each wave 1 to n)
 
@@ -253,7 +249,7 @@ Analyze tasks to identify specialized agent needs:
 - Use pre-assigned `task.agent` from Task Type Detection (Section 6.1.1)
 
 #### 6.2.3 Integration Check
-- Delegate to gem-reviewer (review_scope=wave, wave_tasks={completed task ids})
+- Delegate to gsd-integration-checker (review_scope=wave, wave_tasks={completed task ids})
 - Verify:
   - Build passes across all wave changes
   - Tests pass (lint, typecheck, unit tests)
@@ -273,7 +269,7 @@ Analyze tasks to identify specialized agent needs:
 
 #### 6.2.5 Auto-Agent Invocations (post-wave)
 After each wave completes, automatically invoke specialized agents based on task types:
-- Parallel delegation: gem-reviewer (wave), gem-critic (complex only)
+- Parallel delegation: gsd-integration-checker (wave), gem-critic (complex only)
 
 **Automatic gem-critic (complex only):**
 - Delegate to gem-critic (scope=code, target=wave task files, context=wave objectives)
@@ -306,14 +302,15 @@ All agents return their output to the orchestrator. The orchestrator analyzes th
 
 **Planner Agent Assignment:**
 The planner assigns the `agent` field to each task in `plan.yaml`. This field determines which worker agent executes the task:
-- Tasks with `agent: gem-implementer` → routed to gem-implementer
-- Tasks with `agent: gem-documentation-writer` → routed to gem-documentation-writer
-- Tasks with `agent: se-technical-writer` → routed to se-technical-writer
-- Tasks with `agent: gem-narrative-writer` → routed to gem-narrative-writer
-- Tasks with `agent: gem-designer` → routed to gem-designer
-- Tasks with `agent: gem-browser-tester` → routed to gem-browser-tester
-- Tasks with `agent: gsd-executor` → routed to gsd-executor
-- Tasks with `agent: gsd-code-fixer` → routed to gsd-code-fixer
+- Tasks with `agent: gsd-executor` → routed to gsd-executor (implementation)
+- Tasks with `agent: gsd-debugger` → routed to gsd-debugger (diagnosis)
+- Tasks with `agent: gsd-code-fixer` → routed to gsd-code-fixer (targeted fixes)
+- Tasks with `agent: gsd-code-reviewer` → routed to gsd-code-reviewer (review)
+- Tasks with `agent: gsd-doc-writer` → routed to gsd-doc-writer (documentation)
+- Tasks with `agent: gsd-ui-researcher` → routed to gsd-ui-researcher (UI spec)
+- Tasks with `agent: gem-narrative-writer` → routed to gem-narrative-writer (Obsidian notes)
+- Tasks with `agent: gem-critic` → routed to gem-critic (critique)
+- Tasks with `agent: gsd-security-auditor` → routed to gsd-security-auditor (security audit)
 
 The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
 
@@ -337,15 +334,30 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
     "task_clarifications": "array of {question, answer} (empty if skipped)"
   },
 
-  "gem-implementer": {
+  "gsd-executor": {
+    "task_id": "string",
+    "plan_id": "string",
+    "plan_path": "string",
+    "task_definition": "object"
+  },
+
+  "gsd-debugger": {
     "task_id": "string",
     "plan_id": "string",
     "plan_path": "string",
     "task_definition": "object",
-    "error_context": "object (optional: error_message, stack_trace, failing_test)"
+    "error_context": "object (required: error_message, stack_trace, failing_test)"
   },
 
-  "gem-reviewer": {
+  "gsd-code-fixer": {
+    "task_id": "string",
+    "plan_id": "string",
+    "plan_path": "string",
+    "task_definition": "object",
+    "error_context": "object (optional: error_message, diagnosis_output)"
+  },
+
+  "gsd-code-reviewer": {
     "review_scope": "plan | task | wave",
     "task_id": "string (required for task scope)",
     "plan_id": "string",
@@ -357,6 +369,13 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
     "task_clarifications": "array of {question, answer} (for plan scope)"
   },
 
+  "gsd-integration-checker": {
+    "review_scope": "wave",
+    "plan_id": "string",
+    "plan_path": "string",
+    "wave_tasks": "array of task_ids"
+  },
+
   "gem-critic": {
     "task_id": "string (optional)",
     "plan_id": "string",
@@ -366,7 +385,7 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
     "context": "string (what is being built, what to focus on)"
   },
 
-  "gem-documentation-writer": {
+  "gsd-doc-writer": {
     "task_id": "string",
     "plan_id": "string",
     "plan_path": "string",
@@ -376,13 +395,6 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
     "coverage_matrix": "array"
   },
 
-  "se-technical-writer": {
-    "task_id": "string",
-    "plan_id": "string (optional)",
-    "task_definition": "object",
-    "content_type": "blog|tutorial|ADR|guide"
-  },
-
   "gem-narrative-writer": {
     "task_id": "string",
     "topic": "string",
@@ -390,19 +402,18 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
     "source_context": "string (optional, materials or conversation to summarize)"
   },
 
-  "gem-designer": {
+  "gsd-ui-researcher": {
     "task_id": "string",
     "plan_id": "string",
     "plan_path": "string",
     "task_definition": "object"
   },
 
-  "gem-browser-tester": {
+  "gsd-security-auditor": {
     "task_id": "string",
     "plan_id": "string",
     "plan_path": "string",
-    "task_definition": "object",
-    "error_context": "object (optional: error_message, failing_scenario, screenshot_path)"
+    "task_definition": "object"
   }
 }
 ```
@@ -413,18 +424,18 @@ After each agent completes, the orchestrator routes based on:
 
 | Result Status | Agent Type | Next Action |
 |:--------------|:-----------|:------------|
-| completed | gem-reviewer (plan) | Present plan to user for approval |
-| completed | gem-reviewer (wave) | Continue to next wave or summary |
-| completed | gem-reviewer (task) | Mark task done, continue wave |
-| failed | gem-reviewer | Evaluate failure_type, retry or escalate |
+| completed | gsd-code-reviewer (plan scope) | Present plan to user for approval |
+| completed | gsd-integration-checker (wave scope) | Continue to next wave or summary |
+| completed | gsd-code-reviewer (task scope) | Mark task done, continue wave |
+| failed | gsd-code-reviewer / gsd-integration-checker | Evaluate failure_type, retry or escalate |
 | completed | gem-critic | Aggregate findings, present to user |
-| blocking | gem-critic | Route findings to planner for fixes |
-| completed | gem-implementer | Mark task done, run integration check |
-| failed | gem-implementer | Inject error_context, retry end-to-end (max 3) |
-| completed | gem-designer | Mark task done, pass design spec to dependent implementer tasks |
-| failed | gem-designer | Inject needs_clarification items, redelegate with additional context |
-| completed | gem-browser-tester | Mark task done, attach test report to wave summary |
-| failed | gem-browser-tester | Inject error_context (screenshot, failing scenario), retry (max 3) |
+| blocking | gem-critic | Route findings to gsd-planner for fixes |
+| completed | gsd-executor | Mark task done, run integration check via gsd-integration-checker |
+| failed | gsd-executor | Inject error_context, retry end-to-end (max 3) |
+| completed | gsd-debugger | Root cause identified; route fix to gsd-code-fixer |
+| failed | gsd-debugger | Inject error_context, retry (max 3) |
+| completed | gsd-ui-researcher | Mark task done, pass UI-SPEC to dependent executor tasks |
+| failed | gsd-ui-researcher | Inject needs_clarification items, redelegate with additional context |
 | completed | gem-* / gsd-* | Return to orchestrator for next decision |
 </result_routing>
 
