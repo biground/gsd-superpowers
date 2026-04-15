@@ -1516,6 +1516,25 @@ Never skip the red phase. A test that passes before the fix tells you nothing.
 
 </modes>
 
+<lightweight_fix_mode>
+
+## 轻量修复模式（同一上下文）
+
+当以下条件**全部满足**时，debugger 可在同一上下文中直接修复：
+
+- 根因已明确定位到具体文件和行
+- 修复范围 ≤ 20 行代码变更
+- 修复不涉及架构变更
+- 用户未使用 `--diagnose` 标志
+
+此模式避免了"诊断完成后切换到 executor 再重新理解问题"的上下文切换成本。
+
+对于超出上述范围的修复，仍然输出诊断报告由 executor 处理。
+
+详细调试方法论参见：`skills/systematic-debugging/SKILL.md`
+
+</lightweight_fix_mode>
+
 <success_criteria>
 - [ ] Debug file created IMMEDIATELY on command
 - [ ] File updated after EACH piece of information
