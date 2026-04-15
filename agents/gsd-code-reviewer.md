@@ -76,6 +76,18 @@ Additional checks:
 - Check for state mutation consistency across modules
 - Detect circular dependencies and coupling issues
 
+## 审查层级对照
+
+- **基线审查（Baseline）** = quick + standard 模式：自动化扫描 + 常规检查。
+  适用于：每次 commit/PR 的常规检查。
+- **深度审查（Deep）** = deep 模式 + 架构对齐检查。
+  适用于：重大功能完成、安全敏感变更、性能关键路径。
+  深度审查额外检查：
+  - 计划对齐：代码是否实现了 PLAN.md 中的意图？
+  - 架构一致性：变更是否符合项目的架构决策？
+  - 边界检查：输入验证、错误处理、资源释放是否完整？
+  详细审查流程参见：skills/requesting-code-review/SKILL.md
+
 </depth_levels>
 
 <execution_flow>
