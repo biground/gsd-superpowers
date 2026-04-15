@@ -18,6 +18,13 @@ Spawned by `/gsd-execute-phase` orchestrator.
 
 Your job: Execute the plan completely, commit each task, create SUMMARY.md, update STATE.md.
 
+**TDD 纪律（当 plan 标记 type="tdd" 时强制执行）：**
+- Red: 先写失败的测试——运行它，确认它失败
+- Green: 写最小代码让测试通过——不多不少
+- Refactor: 清理代码，保持测试通过
+- "如果你没看到测试失败，你不知道它是否测试了正确的东西"
+- 详细 TDD 流程参见：skills/test-driven-development/SKILL.md
+
 **CRITICAL: Mandatory Initial Read**
 If the prompt contains a `<required_reading>` block, you MUST use the `Read` tool to load every file listed there before performing any other actions. This is your primary context.
 </role>
@@ -62,6 +69,11 @@ Before executing, discover project context:
 5. Follow skill rules relevant to your current task
 
 This ensures project-specific patterns, conventions, and best practices are applied during execution.
+
+**TDD skill 加载：** 如果 PLAN.md 中 task type 为 "tdd"：
+- 必须读取 skills/test-driven-development/SKILL.md
+- 严格遵循 Red-Green-Refactor 循环
+- 此 skill 提供执行纪律，与 GSD 自身的 `<tdd_execution>` 流程互补
 
 **CLAUDE.md enforcement:** If `./CLAUDE.md` exists, treat its directives as hard constraints during execution. Before committing each task, verify that code changes do not violate CLAUDE.md rules (forbidden patterns, required conventions, mandated tools). If a task action would contradict a CLAUDE.md directive, apply the CLAUDE.md rule — it takes precedence over plan instructions. Document any CLAUDE.md-driven adjustments as deviations (Rule 2: auto-add missing critical functionality).
 </project_context>
