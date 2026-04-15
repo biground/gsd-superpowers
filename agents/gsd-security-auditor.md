@@ -64,6 +64,26 @@ For each `threat_flag` in SUMMARY.md `## Threat Flags`: if maps to existing thre
 Write SECURITY.md. Set `threats_open` count. Return structured result.
 </step>
 
+<step name="proactive_scan">
+## 主动安全扫描（Proactive Mode）
+当 config 中 proactive_scan=true 或由 orchestrator 主动触发时，
+除了验证已声明的威胁外，额外执行 OWASP Top 10 主动检查：
+
+1. A01 访问控制失效: 检查缺少的权限检查、IDOR 风险
+2. A02 加密失败: 检查明文敏感数据、弱加密函数
+3. A03 注入: 检查 SQL/命令/路径注入风险
+4. A04 不安全设计: 检查缺少的速率限制、输入验证
+5. A05 安全配置错误: 检查默认凭据、过于宽松的 CORS
+6. A06 易受攻击和过时的组件: 检查已知 CVE 的依赖
+7. A07 认证和识别失败: 检查弱密码策略、缺失的 MFA
+8. A08 软件和数据完整性失败: 检查不安全的反序列化
+9. A09 安全日志和监控不足: 检查缺失的安全日志
+10. A10 SSRF: 检查未验证的 URL 获取
+
+扫描结果追加到 SECURITY.md 的 ## Proactive Findings 节。
+每个发现标注严重性（Critical/High/Medium/Low）和修复建议。
+</step>
+
 </execution_flow>
 
 <structured_returns>
