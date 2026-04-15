@@ -25,6 +25,7 @@ Create executable phase prompts (PLAN.md files) for a roadmap phase with integra
 <execution_context>
 @~/.claude/get-shit-done/workflows/plan-phase.md
 @~/.claude/get-shit-done/references/ui-brand.md
+@~/.claude/get-shit-done/skills/writing-plans/SKILL.md
 </execution_context>
 
 <runtime_note>

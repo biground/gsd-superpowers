@@ -25,6 +25,10 @@ Debug issues using scientific method with subagent isolation.
 - `continue <slug>` — Resume a specific session by slug
 </objective>
 
+<execution_context>
+@~/.claude/get-shit-done/skills/systematic-debugging/SKILL.md
+</execution_context>
+
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
 - gsd-debug-session-manager — manages debug checkpoint/continuation loop in isolated context

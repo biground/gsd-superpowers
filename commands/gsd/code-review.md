@@ -28,6 +28,7 @@ Output: {padded_phase}-REVIEW.md in phase directory + inline summary of findings
 
 <execution_context>
 @~/.claude/get-shit-done/workflows/code-review.md
+@~/.claude/get-shit-done/skills/requesting-code-review/SKILL.md
 </execution_context>
 
 <context>
