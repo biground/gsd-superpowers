@@ -308,6 +308,27 @@ npx shadcn diff {block} 2>/dev/null
 
 </registry_audit>
 
+<component_framework_consistency>
+
+## 组件框架一致性审计（附加审计）
+
+在 6 支柱评分和注册表审计之后、写入 UI-REVIEW.md 之前执行：
+
+- **CSS 方案混用检测**: 是否同时使用了 Tailwind + CSS Modules + styled-components 等多种方案（检查 `*.module.css`、`styled(` 调用、Tailwind 类名共存）
+- **组件 API 约定一致性**: props 命名是否遵循框架约定（如 `variant`/`size` 而非自创命名）、slot/children 使用是否统一
+- **Tailwind 类名规范**: 是否存在 `!important` 覆盖、过长的类名字符串（>10 个 utility）、或绕过设计系统的硬编码值
+
+```bash
+# 检测 CSS 方案混用
+find src -name "*.module.css" -o -name "*.module.scss" 2>/dev/null | wc -l
+grep -rn "styled(\|css\`" src --include="*.tsx" --include="*.jsx" 2>/dev/null | wc -l
+grep -rn "className=" src --include="*.tsx" --include="*.jsx" 2>/dev/null | wc -l
+```
+
+发现问题记录在 UI-REVIEW.md 的 `## Component Framework Consistency` 节（位于 Detailed Findings 之后）。
+
+</component_framework_consistency>
+
 <output_format>
 
 ## Output: UI-REVIEW.md

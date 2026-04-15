@@ -191,6 +191,21 @@ description: "Third-party registry 'magic-ui' — Safety Gate shows 'view passed
 
 </verification_dimensions>
 
+<tailwind_practice_check>
+
+## Tailwind 实践检查（附加验证）
+
+在完成 6 维度验证后，额外检查 UI-SPEC.md 中的 Tailwind 相关约定：
+
+- **禁止内联 style**: UI-SPEC 中如声明使用 Tailwind，则实现不应出现内联 `style` 属性（动态计算值除外）
+- **响应式断点一致性**: 检查是否统一使用 `sm/md/lg/xl` 断点前缀，避免混用 `max-*` 与 `min-*` 策略
+- **暗色模式覆盖**: 若 UI-SPEC 声明支持暗色模式，验证 `dark:` 前缀变体的使用规划
+- **Tailwind 配置对齐**: UI-SPEC 声明的 spacing/color/typography 必须可映射到 `tailwind.config.*` 的 theme 扩展
+
+此检查结果附加在验证报告的 Recommendations 节，不产生独立的 BLOCK 判定。
+
+</tailwind_practice_check>
+
 <verdict_format>
 
 ## Output Format

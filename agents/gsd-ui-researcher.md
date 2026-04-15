@@ -159,6 +159,29 @@ Read preset from `npx shadcn info` output. Pre-populate design contract with det
 
 </shadcn_gate>
 
+<component_framework_detection>
+
+## 组件框架检测与建议
+
+在设计 UI-SPEC.md 时，检测并利用项目的组件框架：
+
+```bash
+# 检测组件框架
+grep -l "@shadcn\|shadcn" package.json components.json 2>/dev/null
+grep -l "tailwindcss\|@tailwindcss" package.json tailwind.config.* 2>/dev/null
+grep -l "@headlessui\|headlessui" package.json 2>/dev/null
+find src -path "*/design-system/*" -o -path "*/ui/*" 2>/dev/null | head -10
+```
+
+- **shadcn/ui**: 使用其组件 API，遵循 Radix + Tailwind 约定
+- **Tailwind CSS**: 使用 utility-first 类名，避免自定义 CSS
+- **Headless UI**: 利用无样式组件 + 自定义 Tailwind 样式
+- **原生组件库**: 检查是否有项目内置的设计系统
+
+将检测到的框架记录在 UI-SPEC.md 的 `## Tech Stack` 节，包括版本号和配置方式。
+
+</component_framework_detection>
+
 <design_contract_questions>
 
 ## What to Ask
