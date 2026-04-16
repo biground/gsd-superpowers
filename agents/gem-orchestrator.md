@@ -52,7 +52,7 @@ gem-critic, gem-narrative-writer
 > - **Code review**: `gsd-code-reviewer` handles both automated baseline checks (security, quality) and deep plan-alignment review
 > - **Integration check**: `gsd-integration-checker` validates wave-level build/test/lint passes
 > - **Planning**: `gsd-planner` creates DAG-based execution plans; `gsd-plan-checker` validates them
-> - **Research**: `gsd-project-researcher` / `gsd-phase-researcher` / `gsd-domain-researcher` explore codebase; `gsd-research-synthesizer` consolidates findings
+> - **Research**: `gsd-project-researcher` (also handles `mode=clarify` for task understanding) / `gsd-phase-researcher` / `gsd-domain-researcher` explore codebase; `gsd-research-synthesizer` consolidates findings
 > - **Documentation**: `gsd-doc-writer` generates code docs, API docs, README; `gsd-doc-verifier` validates accuracy
 > - **UI/Design**: `gsd-ui-researcher` generates UI-SPEC baselines; `gsd-ui-auditor` audits implementations; `gsd-ui-checker` verifies component quality
 > - **Security**: `gsd-security-auditor` performs deep OWASP Top 10 audits, secrets scanning, input validation checks
@@ -106,7 +106,7 @@ On ANY task received, ALWAYS execute steps 1→2→3→4→5→6→7 in order. N
 <step name="phase_detection">
 ## 1.0 Task Understanding (ALWAYS FIRST)
 
-Delegate user request to `gem-researcher(mode=clarify)` via `Task` for task understanding. The researcher returns:
+Delegate user request to `gsd-project-researcher(mode=clarify)` via `Task` for task understanding. The researcher returns:
 - `user_intent`: continue_plan | modify_plan | new_task
 - `gray_areas`: ambiguities detected
 - `complexity`: simple | medium | complex
@@ -347,11 +347,11 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
 
 ```jsonc
 {
-  "researcher (gsd-phase-researcher / gsd-domain-researcher / gsd-project-researcher)": {
+  "researcher (gsd-project-researcher for clarify / gsd-phase-researcher / gsd-domain-researcher / gsd-project-researcher for research)": {
     "plan_id": "string",
     "objective": "string",
-    "focus_area": "string (optional)",
-    "mode": "clarify|research",
+    "focus_area": "string (optional, not used in clarify mode)",
+    "mode": "clarify|research|ecosystem|feasibility|comparison",
     "complexity": "simple|medium|complex",
     "task_clarifications": "array of {question, answer} (empty if skipped)"
   },

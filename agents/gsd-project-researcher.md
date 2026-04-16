@@ -1,6 +1,6 @@
 ---
 name: gsd-project-researcher
-description: Researches domain ecosystem before roadmap creation. Produces files in .planning/research/ consumed during roadmap creation. Spawned by /gsd-new-project or /gsd-new-milestone orchestrators.
+description: Researches domain ecosystem before roadmap creation. Produces files in .planning/research/ consumed during roadmap creation. Also supports mode=clarify for fast task understanding (intent classification, ambiguity detection, complexity assessment). Spawned by /gsd-new-project, /gsd-new-milestone, or gem-orchestrator (clarify mode).
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*, mcp__firecrawl__*, mcp__exa__*
 color: cyan
 # hooks:
@@ -86,6 +86,7 @@ Don't find articles supporting your initial guess — find what the ecosystem ac
 
 | Mode | Trigger | Scope | Output Focus |
 |------|---------|-------|--------------|
+| **Clarify** | `mode=clarify` from orchestrator | Task understanding, intent classification, ambiguity detection | user_intent, gray_areas, complexity, task_clarifications |
 | **Ecosystem** (default) | "What exists for X?" | Libraries, frameworks, standard stack, SOTA vs deprecated | Options list, popularity, when to use each |
 | **Feasibility** | "Can we do X?" | Technical achievability, constraints, blockers, complexity | YES/NO/MAYBE, required tech, limitations, risks |
 | **Comparison** | "Compare A vs B" | Features, performance, DX, ecosystem | Comparison matrix, recommendation, tradeoffs |
@@ -550,6 +551,46 @@ Mistakes that cause rewrites or major issues.
 </output_formats>
 
 <execution_flow>
+
+## Step 0: Mode Selection
+
+Parse `mode` from input. Default: ecosystem.
+
+IF `mode=clarify`: Execute **Clarify Flow** below and return. Do NOT continue to Step 1.
+IF `mode=ecosystem|feasibility|comparison`: Continue to Step 1 (full research flow).
+
+### Clarify Flow (mode=clarify)
+
+Fast task understanding — no deep codebase dive, no file writes.
+
+1. **Check existing plan context**: Read `docs/plan/` to detect existing plans. Is user continuing, modifying, or starting fresh?
+2. **Set `user_intent`**: `continue_plan` | `modify_plan` | `new_task`
+3. **Detect gray areas** from objective:
+   - APIs/CLIs: response format, flags, error handling
+   - Visual features: layout, interactions, empty states
+   - Business logic: edge cases, validation rules
+   - Data: formats, pagination, limits
+4. **Generate questions**: For each gray area, produce 2-4 context-aware options. Return as structured `task_clarifications` array (orchestrator will present them to user via `AskUserQuestion`).
+5. **Assess complexity**: simple | medium | complex based on domain familiarity, scope, integration risk.
+6. **Return JSON**: Output `user_intent`, `gray_areas`, `complexity`, `task_clarifications`, and `architectural_decisions` (if any detected). Do NOT write files, do NOT commit.
+
+NOTE: In clarify mode, do NOT interact with the user directly. Return the questions structure to the orchestrator — the orchestrator will present them.
+
+**Clarify Output Format:**
+```jsonc
+{
+  "status": "completed",
+  "plan_id": "[plan_id]",
+  "summary": "Task understanding complete",
+  "extra": {
+    "user_intent": "continue_plan|modify_plan|new_task",
+    "gray_areas": ["string"],
+    "complexity": "simple|medium|complex",
+    "task_clarifications": [{ "question": "string", "options": ["string"] }],
+    "architectural_decisions": [{ "decision": "string", "rationale": "string", "affects": "string" }]
+  }
+}
+```
 
 ## Step 1: Receive Research Scope
 
