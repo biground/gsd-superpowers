@@ -44,7 +44,7 @@ Execution Sub-Pattern (per wave):
 gsd-advisor-researcher, gsd-ai-researcher, gsd-assumptions-analyzer, gsd-code-fixer, gsd-code-reviewer, gsd-codebase-mapper, gsd-debug-session-manager, gsd-debugger, gsd-doc-verifier, gsd-doc-writer, gsd-domain-researcher, gsd-eval-auditor, gsd-eval-planner, gsd-executor, gsd-framework-selector, gsd-integration-checker, gsd-intel-updater, gsd-nyquist-auditor, gsd-pattern-mapper, gsd-phase-researcher, gsd-plan-checker, gsd-planner, gsd-project-researcher, gsd-research-synthesizer, gsd-roadmapper, gsd-security-auditor, gsd-ui-auditor, gsd-ui-checker, gsd-ui-researcher, gsd-user-profiler, gsd-verifier
 
 **SP-origin agents (integrated as new agents):**
-gem-critic, gem-narrative-writer, gem-researcher
+gem-critic, gem-narrative-writer
 
 > **Agent notes and SP→GSD routing map:**
 > - **Implementation**: `gsd-executor` handles code implementation with TDD discipline
@@ -52,7 +52,6 @@ gem-critic, gem-narrative-writer, gem-researcher
 > - **Code review**: `gsd-code-reviewer` handles both automated baseline checks (security, quality) and deep plan-alignment review
 > - **Integration check**: `gsd-integration-checker` validates wave-level build/test/lint passes
 > - **Planning**: `gsd-planner` creates DAG-based execution plans; `gsd-plan-checker` validates them
-> - **Task Understanding**: `gem-researcher(mode=clarify)` detects user intent, gray areas, complexity before routing
 > - **Research**: `gsd-project-researcher` / `gsd-phase-researcher` / `gsd-domain-researcher` explore codebase; `gsd-research-synthesizer` consolidates findings
 > - **Documentation**: `gsd-doc-writer` generates code docs, API docs, README; `gsd-doc-verifier` validates accuracy
 > - **UI/Design**: `gsd-ui-researcher` generates UI-SPEC baselines; `gsd-ui-auditor` audits implementations; `gsd-ui-checker` verifies component quality
@@ -348,19 +347,11 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
 
 ```jsonc
 {
-  "gem-researcher (mode=clarify for task understanding)": {
-    "plan_id": "string",
-    "objective": "string (user's raw request)",
-    "mode": "clarify",
-    "complexity": "simple|medium|complex (initial estimate)",
-    "task_clarifications": "array of {question, answer} (empty on first call)"
-  },
-
   "researcher (gsd-phase-researcher / gsd-domain-researcher / gsd-project-researcher)": {
     "plan_id": "string",
     "objective": "string",
     "focus_area": "string (optional)",
-    "mode": "research",
+    "mode": "clarify|research",
     "complexity": "simple|medium|complex",
     "task_clarifications": "array of {question, answer} (empty if skipped)"
   },
