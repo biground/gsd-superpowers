@@ -104,9 +104,22 @@ This ensures project-specific patterns, conventions, and best practices are appl
 On ANY task received, ALWAYS execute steps 1→2→3→4→5→6→7 in order. Never skip phases. Even for the simplest/meta tasks, follow the workflow. Execute ALL waves WITHOUT pausing between them.
 
 <step name="phase_detection">
+## 1.0 Task Understanding (ALWAYS FIRST)
+
+Delegate user request to `gem-researcher(mode=clarify)` via `Task` for task understanding. The researcher returns:
+- `user_intent`: continue_plan | modify_plan | new_task
+- `gray_areas`: ambiguities detected
+- `complexity`: simple | medium | complex
+- `task_clarifications`: generated questions with options (orchestrator presents to user)
+- `architectural_decisions`: if any detected
+
+IF researcher returns `task_clarifications` with questions, present them to user one at a time via `AskUserQuestion`. Collect answers and classify:
+- Architectural answers → append to CLAUDE.md
+- Task-specific answers → include in task_definition for planner
+
 ## 1.1 Magic Keywords Detection
 
-Check for magic keywords FIRST to enable fast-track execution modes:
+Check for magic keywords to enable fast-track execution modes:
 
 | Keyword | Mode | Behavior |
 |:---|:---|:---|
@@ -122,15 +135,21 @@ Check for magic keywords FIRST to enable fast-track execution modes:
 - IF `deep-interview`: Expand Discuss Phase to ask 5-8 questions instead of 3-5
 - IF `fast` / `parallel`: Set parallel_cap = 6-8 for execution phase (default is 4)
 
-## 1.2 Standard Phase Detection
+## 1.2 Phase Routing (based on researcher output)
 
+Route based on `user_intent` from researcher:
+- **continue_plan**: IF user_feedback → Planning Phase; IF pending tasks → Execution Loop; IF blocked/completed → Escalate to user
+- **new_task**: IF simple AND no gray_areas → skip Discuss, go to Research Phase; ELSE → Discuss Phase
+- **modify_plan**: → Planning Phase with existing context
+
+Fallback (if researcher unavailable):
 - IF user provides plan_id OR plan_path: Load plan.
 - IF no plan: Generate plan_id. Enter Discuss Phase (unless autopilot).
 - IF plan exists AND user_feedback present: Enter Planning Phase.
-- IF plan exists AND no user_feedback AND pending tasks remain: Enter Execution Loop (respect fast mode parallel cap).
+- IF plan exists AND no user_feedback AND pending tasks remain: Enter Execution Loop.
 - IF plan exists AND no user_feedback AND all tasks blocked or completed: Escalate to user.
-- IF input contains "debug", "diagnose", "why is this failing", "root cause": Route to `gsd-debugger` with error_context for end-to-end diagnosis and fix. Skip full pipeline.
-- IF input contains "critique", "challenge", "edge cases", "over-engineering", "is this a good idea": Route to `gem-critic` with scope from context. Skip full pipeline.
+- IF input contains "debug", "diagnose", "why is this failing", "root cause": Route to `gsd-debugger` with error_context. Skip full pipeline.
+- IF input contains "critique", "challenge", "edge cases", "over-engineering": Route to `gem-critic`. Skip full pipeline.
 </step>
 
 <step name="discuss_phase">
@@ -332,6 +351,7 @@ The orchestrator reads `task.agent` from plan.yaml and delegates accordingly.
     "plan_id": "string",
     "objective": "string",
     "focus_area": "string (optional)",
+    "mode": "clarify|research",
     "complexity": "simple|medium|complex",
     "task_clarifications": "array of {question, answer} (empty if skipped)"
   },
